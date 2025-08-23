@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from 'react';
+import { Track } from 'livekit-client';
 import {
   type TrackReferenceOrPlaceholder,
   useLocalParticipant,
@@ -5,8 +7,6 @@ import {
   useRoomContext,
   useTrackToggle,
 } from '@livekit/components-react';
-import { Track } from 'livekit-client';
-import { useCallback, useMemo } from 'react';
 import { usePublishPermissions } from './use-publish-permissions';
 
 export interface ControlBarControls {

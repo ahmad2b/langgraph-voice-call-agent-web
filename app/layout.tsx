@@ -1,8 +1,8 @@
+import { Geist, Geist_Mono } from 'next/font/google';
+import { headers } from 'next/headers';
 import { APP_CONFIG_DEFAULTS } from '@/app-config';
 import { ApplyThemeScript, ThemeToggle } from '@/components/theme-toggle';
 import { getAppConfig } from '@/lib/utils';
-import { Geist, Geist_Mono } from 'next/font/google';
-import { headers } from 'next/headers';
 import './globals.css';
 
 const geist = Geist({
