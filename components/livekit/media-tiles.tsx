@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Track } from 'livekit-client';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -30,7 +30,7 @@ const animationProps = {
     scale: 0,
   },
   transition: {
-    type: 'spring',
+    type: 'spring' as const,
     stiffness: 675,
     damping: 75,
     mass: 1,

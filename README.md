@@ -79,7 +79,8 @@ This application is designed to work seamlessly with your LangGraph agent throug
 export const APP_CONFIG_DEFAULTS = {
   companyName: 'LangGraph Voice Agent',
   pageTitle: 'LangGraph Voice Call Agent',
-  pageDescription: 'A real-time voice/call AI agent that lets you talk to a LangGraph agent over LiveKit\'s real-time communication platform',
+  pageDescription:
+    "A real-time voice/call AI agent that lets you talk to a LangGraph agent over LiveKit's real-time communication platform",
   supportsChatInput: true,
   supportsVideoInput: true,
   supportsScreenShare: true,
@@ -108,6 +109,7 @@ These are required for the voice agent functionality to work with your LiveKit r
 ## Features
 
 ### **Current Capabilities**
+
 - **Voice Calls**: Full-duplex voice conversations with your LangGraph agent
 - **Text Chat**: Direct text messaging with the agent
 - **Video Support**: Camera and screen sharing capabilities
@@ -116,6 +118,7 @@ These are required for the voice agent functionality to work with your LiveKit r
 - **Theme Support**: Light/dark mode with system preference detection
 
 ### **Architecture**
+
 - **Frontend**: Next.js with TypeScript and Tailwind CSS
 - **Voice Infrastructure**: LiveKit's real-time communication platform
 - **Agent Integration**: Direct connection to your LiveKit backend

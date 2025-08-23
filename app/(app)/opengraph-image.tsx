@@ -1,12 +1,12 @@
-import { APP_CONFIG_DEFAULTS } from '@/app-config';
-import { getAppConfig } from '@/lib/utils';
-import getImageSize from 'buffer-image-size';
-import mime from 'mime';
 import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
+import getImageSize from 'buffer-image-size';
+import mime from 'mime';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { APP_CONFIG_DEFAULTS } from '@/app-config';
+import { getAppConfig } from '@/lib/utils';
 
 type Dimensions = {
   width: number;
@@ -110,8 +110,6 @@ export default async function Image() {
   const isLogoUriLocal = logoUri.includes('lk-logo');
   const wordmarkUri = logoUri === APP_CONFIG_DEFAULTS.logoDark ? logoUri : logoUri;
 
-
-
   // bg
   const { base64: bgSrcBase64 } = await getImageData('public/opengraph-image-bg.png');
 
@@ -185,20 +183,20 @@ export default async function Image() {
           }}
         >
           <div
-          style={{
-            backgroundColor: '#1F1F1F',
-            padding: '2px 8px',
-            borderRadius: 4,
-            width: 72,
-            fontSize: 12,
-            fontFamily: 'monospace',
-            fontWeight: 600,
-            color: '#999999',
-            letterSpacing: 0.8,
-          }}
-        >
-          VOICE
-        </div>
+            style={{
+              backgroundColor: '#1F1F1F',
+              padding: '2px 8px',
+              borderRadius: 4,
+              width: 72,
+              fontSize: 12,
+              fontFamily: 'monospace',
+              fontWeight: 600,
+              color: '#999999',
+              letterSpacing: 0.8,
+            }}
+          >
+            VOICE
+          </div>
           <div
             style={{
               fontSize: 48,
