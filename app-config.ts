@@ -7,8 +7,8 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
     "A real-time voice/call AI agent that lets you talk to a LangGraph agent over LiveKit's real-time communication platform",
 
   supportsChatInput: true,
-  supportsVideoInput: true,
-  supportsScreenShare: true,
+  supportsVideoInput: false,
+  supportsScreenShare: false,
   isPreConnectBufferEnabled: true,
 
   logo: '/your-logo.svg',
