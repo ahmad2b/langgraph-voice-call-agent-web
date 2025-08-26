@@ -10,7 +10,7 @@ export type ThemeMode = 'dark' | 'light' | 'system';
 export interface AppConfig {
   pageTitle: string;
   pageDescription: string;
-  companyName: string;
+  appName: string;
 
   supportsChatInput: boolean;
   supportsVideoInput: boolean;
@@ -19,6 +19,7 @@ export interface AppConfig {
 
   logo: string;
   startButtonText: string;
+  startChatButtonText: string;
   accent?: string;
   logoDark?: string;
   accentDark?: string;

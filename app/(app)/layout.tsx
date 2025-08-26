@@ -1,6 +1,6 @@
+import { getAppConfig } from '@/lib/utils';
 import { headers } from 'next/headers';
 import Link from 'next/link';
-import { getAppConfig } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -8,7 +8,7 @@ interface AppLayoutProps {
 
 export default async function AppLayout({ children }: AppLayoutProps) {
   const hdrs = await headers();
-  const { companyName } = await getAppConfig(hdrs);
+  const { appName } = await getAppConfig(hdrs);
 
   return (
     <>
@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
           href="/"
           className="text-foreground font-mono text-xs font-bold tracking-wider uppercase"
         >
-          {companyName}
+          {appName}
         </Link>
       </header>
       {children}

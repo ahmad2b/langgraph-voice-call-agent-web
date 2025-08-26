@@ -75,15 +75,28 @@ export function App({ appConfig }: AppProps) {
     };
   }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled]);
 
-  const { startButtonText } = appConfig;
+  const { startButtonText, startChatButtonText } = appConfig;
+
+  const handleDisconnect = () => {
+    setSessionStarted(false);
+    setUiVisible(false);
+  };
 
   return (
     <main>
       <MotionWelcome
         key="welcome"
         startButtonText={startButtonText}
-        onStartCall={() => setSessionStarted(true)}
-        disabled={sessionStarted}
+        startChatButtonText={startChatButtonText}
+        onStartCall={() => {
+          setUiVisible(true);
+          setSessionStarted(true);
+        }}
+        onStartChat={() => {
+          setUiVisible(true);
+          setSessionStarted(false);
+        }}
+        disabled={uiVisible}
         initial={{ opacity: 1 }}
         animate={{ opacity: sessionStarted ? 0 : 1 }}
         transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}

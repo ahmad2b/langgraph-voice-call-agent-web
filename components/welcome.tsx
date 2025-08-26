@@ -4,13 +4,17 @@ import { cn } from '@/lib/utils';
 interface WelcomeProps {
   disabled: boolean;
   startButtonText: string;
+  startChatButtonText: string;
   onStartCall: () => void;
+  onStartChat?: () => void;
 }
 
 export const Welcome = ({
   disabled,
   startButtonText,
+  startChatButtonText,
   onStartCall,
+  onStartChat,
   ref,
 }: React.ComponentProps<'div'> & WelcomeProps) => {
   return (
@@ -42,6 +46,11 @@ export const Welcome = ({
       <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
         {startButtonText}
       </Button>
+      <div className="mt-2">
+        <Button variant="secondary" size="lg" onClick={onStartChat} className="w-64 font-mono">
+          {startChatButtonText}
+        </Button>
+      </div>
       <footer className="fixed bottom-5 left-0 z-20 flex w-full items-center justify-center">
         <p className="text-fg1 max-w-prose pt-1 text-xs leading-5 font-normal text-pretty md:text-sm">
           Ready to start your voice conversation with your LangGraph agent
