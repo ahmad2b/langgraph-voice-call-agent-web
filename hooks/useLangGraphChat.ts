@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
 import type { Message } from '@langchain/langgraph-sdk';
 import { useStream } from '@langchain/langgraph-sdk/react';
 import type { ReceivedChatMessage } from '@livekit/components-react';
+import { useMemo } from 'react';
 
 type UseLangGraphChatParams = {
   apiUrl?: string;
@@ -51,12 +51,6 @@ export default function useLangGraphChat(params: UseLangGraphChatParams): UseLan
     const newMessage = { type: 'human', content: text } as any;
     stream.submit(
       { messages: [newMessage] },
-      {
-        optimisticValues(prev) {
-          const prevMessages = (prev as any)?.messages ?? [];
-          return { ...(prev as any), messages: [...prevMessages, newMessage] } as any;
-        },
-      }
     );
   }
 

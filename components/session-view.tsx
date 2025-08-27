@@ -1,13 +1,5 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
-import {
-  type AgentState,
-  type ReceivedChatMessage,
-  useRoomContext,
-  useVoiceAssistant,
-} from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
 import { AgentControlBar } from '@/components/livekit/agent-control-bar/agent-control-bar';
 import { ChatEntry } from '@/components/livekit/chat/chat-entry';
@@ -18,6 +10,14 @@ import { useDebugMode } from '@/hooks/useDebug';
 import useLangGraphChat from '@/hooks/useLangGraphChat';
 import type { AppConfig } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import {
+  type AgentState,
+  type ReceivedChatMessage,
+  useRoomContext,
+  useVoiceAssistant,
+} from '@livekit/components-react';
+import { AnimatePresence, motion } from 'motion/react';
+import React, { useEffect, useState } from 'react';
 
 function isAgentAvailable(agentState: AgentState): boolean {
   return agentState == 'listening' || agentState == 'thinking' || agentState == 'speaking';
@@ -30,6 +30,13 @@ interface SessionViewProps {
   onDisconnect?: () => void;
 }
 
+/**
+ * SessionView Component - Handles both chat-only and voice call sessions
+ * 
+ * Conditional Rendering:
+ * - Chat-only mode: Shows only chat interface
+ * - Voice mode: Shows chat + media tiles + video controls + top background
+ */
 export const SessionView = ({
   appConfig,
   disabled,
@@ -39,13 +46,16 @@ export const SessionView = ({
 }: React.ComponentProps<'div'> & SessionViewProps) => {
   const { state: agentState } = useVoiceAssistant();
   const [chatOpen, setChatOpen] = useState(false);
-  // LiveKit chat+transcription for call mode
+  
+  // LiveKit chat+transcription for voice call mode
   const livekit = useChatAndTranscription();
-  // LangGraph chat for non-call mode
+  // LangGraph chat for chat-only mode
   const langgraph = useLangGraphChat({
     apiUrl: process.env.NEXT_PUBLIC_LANGGRAPH_API_URL,
     assistantId: process.env.NEXT_PUBLIC_LANGGRAPH_ASSISTANT_ID,
   });
+  
+  // Select message source based on session mode
   const messages = sessionMode === 'voice' ? livekit.messages : langgraph.messages;
   const room = useRoomContext();
 
@@ -123,7 +133,11 @@ export const SessionView = ({
     >
       <ChatMessageView
         className={cn(
-          'mx-auto min-h-svh w-full max-w-2xl px-3 pt-32 pb-40 transition-[opacity,translate] duration-300 ease-out md:px-0 md:pt-36 md:pb-48',
+          'mx-auto min-h-svh w-full max-w-2xl px-3 transition-[opacity,translate] duration-300 ease-out md:px-0 pb-40 md:pb-48',
+          // Adjust spacing based on session mode
+          sessionMode === 'voice' 
+            ? 'pt-32 md:pt-36'  // Space for media tiles in voice mode
+            : 'pt-20 md:pt-24 ', // Reduced spacing for chat-only mode
           chatOpen ? 'translate-y-0 opacity-100 delay-200' : 'translate-y-20 opacity-0'
         )}
       >
@@ -144,12 +158,16 @@ export const SessionView = ({
         </div>
       </ChatMessageView>
 
-      <div className="bg-background mp-12 fixed top-0 right-0 left-0 h-32 md:h-36">
-        {/* skrim */}
-        <div className="from-background absolute bottom-0 left-0 h-12 w-full translate-y-full bg-gradient-to-b to-transparent" />
-      </div>
+      {/* Top background overlay - only show in voice mode for media tiles */}
+      {sessionMode === 'voice' && (
+        <div className="bg-background mp-12 fixed top-0 right-0 left-0 h-32 md:h-36">
+          {/* skrim */}
+          <div className="from-background absolute bottom-0 left-0 h-12 w-full translate-y-full bg-gradient-to-b to-transparent" />
+        </div>
+      )}
 
-      <MediaTiles chatOpen={chatOpen} />
+      {/* Media tiles - only show in voice mode */}
+      {sessionMode === 'voice' && <MediaTiles chatOpen={chatOpen} />}
 
       <div className="bg-background fixed right-0 bottom-0 left-0 z-50 px-3 pt-2 pb-3 md:px-12 md:pb-12">
         <motion.div
