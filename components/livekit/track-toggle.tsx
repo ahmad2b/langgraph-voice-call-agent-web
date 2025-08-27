@@ -1,7 +1,9 @@
 'use client';
 
 import * as React from 'react';
+
 import { Track } from 'livekit-client';
+
 import { useTrackToggle } from '@livekit/components-react';
 import {
   MicrophoneIcon,
@@ -11,6 +13,7 @@ import {
   VideoCameraIcon,
   VideoCameraSlashIcon,
 } from '@phosphor-icons/react/dist/ssr';
+
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+
 import { decodeJwt } from 'jose';
+
 import { ConnectionDetails } from '@/app/api/connection-details/route';
 import { AppConfig } from '@/lib/types';
 

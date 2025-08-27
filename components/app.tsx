@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+
 import { Room, RoomEvent } from 'livekit-client';
 import { motion } from 'motion/react';
+
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
+
 import { toastAlert } from '@/components/alert-toast';
 import { SessionView } from '@/components/session-view';
 import { Toaster } from '@/components/ui/sonner';

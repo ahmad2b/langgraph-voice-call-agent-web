@@ -1,13 +1,17 @@
 import { useMemo } from 'react';
+
 import { Track } from 'livekit-client';
 import { AnimatePresence, motion } from 'motion/react';
+
 import {
   type TrackReference,
   useLocalParticipant,
   useTracks,
   useVoiceAssistant,
 } from '@livekit/components-react';
+
 import { cn } from '@/lib/utils';
+
 import { AgentTile } from './agent-tile';
 import { AvatarTile } from './avatar-tile';
 import { VideoTile } from './video-tile';

@@ -2,7 +2,9 @@
 
 import { cva } from 'class-variance-authority';
 import { LocalAudioTrack, LocalVideoTrack } from 'livekit-client';
+
 import { useMaybeRoomContext, useMediaDeviceSelect } from '@livekit/components-react';
+
 import {
   Select,
   SelectContent,

@@ -1,9 +1,13 @@
 import { cache } from 'react';
+
 import { type ClassValue, clsx } from 'clsx';
 import { Room } from 'livekit-client';
 import { twMerge } from 'tailwind-merge';
+
 import type { ReceivedChatMessage, TextStreamData } from '@livekit/components-react';
+
 import { APP_CONFIG_DEFAULTS } from '@/app-config';
+
 import type { AppConfig, SandboxConfig } from './types';
 
 export const CONFIG_ENDPOINT = process.env.NEXT_PUBLIC_APP_CONFIG_ENDPOINT;

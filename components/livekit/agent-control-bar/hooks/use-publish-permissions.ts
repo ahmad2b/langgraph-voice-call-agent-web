@@ -1,4 +1,5 @@
 import { Track } from 'livekit-client';
+
 import { useLocalParticipantPermissions } from '@livekit/components-react';
 
 const trackSourceToProtocol = (source: Track.Source) => {

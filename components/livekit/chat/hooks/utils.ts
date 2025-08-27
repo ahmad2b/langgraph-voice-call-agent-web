@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import type { MessageFormatter, ReceivedChatMessage } from '@livekit/components-react';
 
 export const useChatMessage = (entry: ReceivedChatMessage, messageFormatter?: MessageFormatter) => {
