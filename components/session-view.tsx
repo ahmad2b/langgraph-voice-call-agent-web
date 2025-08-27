@@ -1,5 +1,13 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import {
+  type AgentState,
+  type ReceivedChatMessage,
+  useRoomContext,
+  useVoiceAssistant,
+} from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
 import { AgentControlBar } from '@/components/livekit/agent-control-bar/agent-control-bar';
 import { ChatEntry } from '@/components/livekit/chat/chat-entry';
@@ -7,36 +15,38 @@ import { ChatMessageView } from '@/components/livekit/chat/chat-message-view';
 import { MediaTiles } from '@/components/livekit/media-tiles';
 import useChatAndTranscription from '@/hooks/useChatAndTranscription';
 import { useDebugMode } from '@/hooks/useDebug';
+import useLangGraphChat from '@/hooks/useLangGraphChat';
 import type { AppConfig } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import {
-  type AgentState,
-  type ReceivedChatMessage,
-  useRoomContext,
-  useVoiceAssistant,
-} from '@livekit/components-react';
-import { AnimatePresence, motion } from 'motion/react';
-import React, { useEffect, useState } from 'react';
 
-function isAgentAvailable(agentState: AgentState) {
+function isAgentAvailable(agentState: AgentState): boolean {
   return agentState == 'listening' || agentState == 'thinking' || agentState == 'speaking';
 }
 
 interface SessionViewProps {
   appConfig: AppConfig;
   disabled: boolean;
-  sessionStarted: boolean;
+  sessionMode: 'chat' | 'voice';
+  onDisconnect?: () => void;
 }
 
 export const SessionView = ({
   appConfig,
   disabled,
-  sessionStarted,
+  sessionMode,
+  onDisconnect,
   ref,
 }: React.ComponentProps<'div'> & SessionViewProps) => {
   const { state: agentState } = useVoiceAssistant();
   const [chatOpen, setChatOpen] = useState(false);
-  const { messages, send } = useChatAndTranscription();
+  // LiveKit chat+transcription for call mode
+  const livekit = useChatAndTranscription();
+  // LangGraph chat for non-call mode
+  const langgraph = useLangGraphChat({
+    apiUrl: process.env.NEXT_PUBLIC_LANGGRAPH_API_URL,
+    assistantId: process.env.NEXT_PUBLIC_LANGGRAPH_ASSISTANT_ID,
+  });
+  const messages = sessionMode === 'voice' ? livekit.messages : langgraph.messages;
   const room = useRoomContext();
 
   useDebugMode({
@@ -44,11 +54,24 @@ export const SessionView = ({
   });
 
   async function handleSendMessage(message: string) {
-    await send(message);
+    if (sessionMode === 'voice') {
+      await livekit.send(message);
+    } else {
+      await langgraph.send(message);
+    }
+  }
+
+  function handleDisconnect() {
+    if (sessionMode === 'voice') {
+      room.disconnect(); // This will trigger the onDisconnected event in App.tsx
+    } else {
+      // In chat-only mode, call the parent's disconnect handler
+      onDisconnect?.();
+    }
   }
 
   useEffect(() => {
-    if (sessionStarted) {
+    if (sessionMode === 'voice') {
       const timeout = setTimeout(() => {
         if (!isAgentAvailable(agentState)) {
           const reason =
@@ -71,7 +94,7 @@ export const SessionView = ({
 
       return () => clearTimeout(timeout);
     }
-  }, [agentState, sessionStarted, room]);
+  }, [agentState, sessionMode, room]);
 
   const { supportsChatInput, supportsVideoInput, supportsScreenShare } = appConfig;
   const capabilities = {
@@ -79,6 +102,13 @@ export const SessionView = ({
     supportsVideoInput,
     supportsScreenShare,
   };
+
+  // Expose chat input in non-call mode by forcing chat area open
+  useEffect(() => {
+    if (sessionMode === 'chat') {
+      setChatOpen(true);
+    }
+  }, [sessionMode]);
 
   return (
     <section
@@ -126,17 +156,17 @@ export const SessionView = ({
           key="control-bar"
           initial={{ opacity: 0, translateY: '100%' }}
           animate={{
-            opacity: sessionStarted ? 1 : 0,
-            translateY: sessionStarted ? '0%' : '100%',
+            opacity: 1, // Always show control bar when UI is visible
+            translateY: '0%',
           }}
-          transition={{ duration: 0.3, delay: sessionStarted ? 0.5 : 0, ease: 'easeOut' }}
+          transition={{ duration: 0.3, delay: 0.5, ease: 'easeOut' }}
         >
           <div className="relative z-10 mx-auto w-full max-w-2xl">
             {appConfig.isPreConnectBufferEnabled && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{
-                  opacity: sessionStarted && messages.length === 0 ? 1 : 0,
+                  opacity: sessionMode === 'voice' && messages.length === 0 ? 1 : 0,
                   transition: {
                     ease: 'easeIn',
                     delay: messages.length > 0 ? 0 : 0.8,
@@ -146,7 +176,7 @@ export const SessionView = ({
                 aria-hidden={messages.length > 0}
                 className={cn(
                   'absolute inset-x-0 -top-12 text-center',
-                  sessionStarted && messages.length === 0 && 'pointer-events-none'
+                  sessionMode === 'voice' && messages.length === 0 && 'pointer-events-none'
                 )}
               >
                 <p className="animate-text-shimmer inline-block !bg-clip-text text-sm font-semibold text-transparent">
@@ -157,8 +187,17 @@ export const SessionView = ({
 
             <AgentControlBar
               capabilities={capabilities}
+              controls={{
+                chat: true, // Force chat control to be visible
+                leave: true, // Always show disconnect/back button
+                microphone: sessionMode === 'voice',
+                camera: sessionMode === 'voice',
+                screenShare: sessionMode === 'voice',
+              }}
               onChatOpenChange={setChatOpen}
               onSendMessage={handleSendMessage}
+              onDisconnect={handleDisconnect}
+              defaultChatOpen={sessionMode === 'chat'}
             />
           </div>
           {/* skrim */}

@@ -1,10 +1,9 @@
 'use client';
 
-import * as React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Track } from 'livekit-client';
 import { BarVisualizer, useRemoteParticipants } from '@livekit/components-react';
-import { ChatTextIcon, PhoneDisconnectIcon } from '@phosphor-icons/react/dist/ssr';
+import { ArrowLeftIcon, ChatTextIcon, PhoneDisconnectIcon } from '@phosphor-icons/react/dist/ssr';
 import { ChatInput } from '@/components/livekit/chat/chat-input';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -22,6 +21,7 @@ export interface AgentControlBarProps
   onSendMessage?: (message: string) => Promise<void>;
   onDisconnect?: () => void;
   onDeviceError?: (error: { source: Track.Source; error: Error }) => void;
+  defaultChatOpen?: boolean;
 }
 
 /**
@@ -36,16 +36,20 @@ export function AgentControlBar({
   onChatOpenChange,
   onDisconnect,
   onDeviceError,
+  defaultChatOpen,
   ...props
 }: AgentControlBarProps) {
   const participants = useRemoteParticipants();
-  const [chatOpen, setChatOpen] = React.useState(false);
-  const [isSendingMessage, setIsSendingMessage] = React.useState(false);
+  const isInCall = participants.length > 0;
+  const [chatOpen, setChatOpen] = useState<boolean>(defaultChatOpen ?? false);
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const isAgentAvailable = participants.some((p) => p.isAgent);
-  const isInputDisabled = !chatOpen || !isAgentAvailable || isSendingMessage;
+  // In chat-only mode (no participants), allow input. In call mode, require agent.
+  const isInputDisabled =
+    !chatOpen || (participants.length > 0 && !isAgentAvailable) || isSendingMessage;
 
-  const [isDisconnecting, setIsDisconnecting] = React.useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const {
     micTrackRef,
@@ -77,7 +81,7 @@ export function AgentControlBar({
     onDisconnect?.();
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     onChatOpenChange?.(chatOpen);
   }, [chatOpen, onChatOpenChange]);
 
@@ -209,7 +213,7 @@ export function AgentControlBar({
               aria-label="Toggle chat"
               pressed={chatOpen}
               onPressedChange={setChatOpen}
-              disabled={!isAgentAvailable}
+              disabled={participants.length > 0 && !isAgentAvailable}
               className="aspect-square h-full"
             >
               <ChatTextIcon weight="bold" />
@@ -223,9 +227,9 @@ export function AgentControlBar({
             disabled={isDisconnecting}
             className="font-mono"
           >
-            <PhoneDisconnectIcon weight="bold" />
-            <span className="hidden md:inline">END CALL</span>
-            <span className="inline md:hidden">END</span>
+            {isInCall ? <PhoneDisconnectIcon weight="bold" /> : <ArrowLeftIcon weight="bold" />}
+            <span className="hidden md:inline">{isInCall ? 'END CALL' : 'BACK'}</span>
+            <span className="inline md:hidden">{isInCall ? 'END' : 'BACK'}</span>
           </Button>
         )}
       </div>

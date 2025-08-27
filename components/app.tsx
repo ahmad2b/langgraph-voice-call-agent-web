@@ -20,13 +20,16 @@ interface AppProps {
 
 export function App({ appConfig }: AppProps) {
   const room = useMemo(() => new Room(), []);
-  const [sessionStarted, setSessionStarted] = useState(false);
+  const [sessionMode, setSessionMode] = useState<'chat' | 'voice'>('chat');
+  const [currentView, setCurrentView] = useState<'welcome' | 'session'>('welcome');
   const { refreshConnectionDetails, existingOrRefreshConnectionDetails } =
     useConnectionDetails(appConfig);
 
+  // Setup LiveKit room event listeners for disconnection and media errors
   useEffect(() => {
     const onDisconnected = () => {
-      setSessionStarted(false);
+      setSessionMode('chat');
+      setCurrentView('welcome'); // Also hide UI to go back to welcome screen
       refreshConnectionDetails();
     };
     const onMediaDevicesError = (error: Error) => {
@@ -43,9 +46,10 @@ export function App({ appConfig }: AppProps) {
     };
   }, [room, refreshConnectionDetails]);
 
+  // Auto-connect to LiveKit room when voice mode is activated
   useEffect(() => {
     let aborted = false;
-    if (sessionStarted && room.state === 'disconnected') {
+    if (sessionMode === 'voice' && room.state === 'disconnected') {
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,
@@ -73,13 +77,14 @@ export function App({ appConfig }: AppProps) {
       aborted = true;
       room.disconnect();
     };
-  }, [room, sessionStarted, appConfig.isPreConnectBufferEnabled]);
+  }, [room, sessionMode, appConfig.isPreConnectBufferEnabled, existingOrRefreshConnectionDetails]);
 
   const { startButtonText, startChatButtonText } = appConfig;
 
+  // Handle user-initiated disconnection (resets to welcome screen)
   const handleDisconnect = () => {
-    setSessionStarted(false);
-    setUiVisible(false);
+    setSessionMode('chat');
+    setCurrentView('welcome');
   };
 
   return (
@@ -89,17 +94,17 @@ export function App({ appConfig }: AppProps) {
         startButtonText={startButtonText}
         startChatButtonText={startChatButtonText}
         onStartCall={() => {
-          setUiVisible(true);
-          setSessionStarted(true);
+          setCurrentView('session');
+          setSessionMode('voice');
         }}
         onStartChat={() => {
-          setUiVisible(true);
-          setSessionStarted(false);
+          setCurrentView('session');
+          setSessionMode('chat');
         }}
-        disabled={uiVisible}
+        disabled={currentView === 'session'}
         initial={{ opacity: 1 }}
-        animate={{ opacity: sessionStarted ? 0 : 1 }}
-        transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
+        animate={{ opacity: currentView === 'session' ? 0 : 1 }}
+        transition={{ duration: 0.5, ease: 'linear', delay: currentView === 'session' ? 0 : 0.5 }}
       />
 
       <RoomContext.Provider value={room}>
@@ -109,14 +114,15 @@ export function App({ appConfig }: AppProps) {
         <MotionSessionView
           key="session-view"
           appConfig={appConfig}
-          disabled={!sessionStarted}
-          sessionStarted={sessionStarted}
+          disabled={currentView === 'welcome'}
+          sessionMode={sessionMode}
+          onDisconnect={handleDisconnect}
           initial={{ opacity: 0 }}
-          animate={{ opacity: sessionStarted ? 1 : 0 }}
+          animate={{ opacity: currentView === 'session' ? 1 : 0 }}
           transition={{
             duration: 0.5,
             ease: 'linear',
-            delay: sessionStarted ? 0.5 : 0,
+            delay: currentView === 'session' ? 0.5 : 0,
           }}
         />
       </RoomContext.Provider>
